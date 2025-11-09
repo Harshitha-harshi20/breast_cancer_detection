@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #36d1dc, #5b86e5, #ff6ec4);
+      background-size: 600% 600%;
+      animation: gradientBG 15s ease infinite;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h2 {
+      margin-top: 30px;
+      font-size: 2.5rem;
+      text-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    p {
+      font-size: 1.3rem;
+      margin-top: 15px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.6);
+    }
+
+    .dashboard {
+      margin-top: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      width: 80%;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 25px;
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transform-style: preserve-3d;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .card:hover {
+      transform: rotateY(8deg) rotateX(8deg) scale(1.05);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .logout {
+      margin: 30px;
+      padding: 12px 25px;
+      background: linear-gradient(45deg, #ff6ec4, #7873f5);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    }
+
+    .logout:hover {
+      background: linear-gradient(45deg, #36d1dc, #3bb2b8);
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h2>Welcome, Patient!</h2>
+  <p>Here you will see only your reports 📄</p>
+
+  <div class="dashboard">
+    <div class="card">
+      <h3>Latest Report</h3>
+      <p>{{ latest_report }}</p>
+    </div>
+    <div class="card">
+      <h3>Your History</h3>
+      <p>{{ history_count }} Reports</p>
+    </div>
+  </div>
+
+  <form action="{{ url_for('logout') }}" method="POST">
+    <button type="submit" class="logout">Logout</button>
+  </form>
+</body>
+</html>

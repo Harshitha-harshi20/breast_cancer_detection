@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Breast Cancer Prediction Report</title>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #f0f2f5;
+    color: #333;
+}
+#message-box {
+    background-color: {% if result == 'Benign' %}#d4edda{% else %}#f8d7da{% endif %};
+    color: {% if result == 'Benign' %}#155724{% else %}#721c24{% endif %};
+    border: 1px solid {% if result == 'Benign' %}#c3e6cb{% else %}#f5c6cb{% endif %};
+    border-radius: 8px;
+    padding: 15px 25px;
+    max-width: 600px;
+    margin: 30px auto;
+    text-align: center;
+    font-size: 1.2rem;
+}
+#report-box {
+    background-color: #fff;
+    max-width: 700px;
+    margin: 20px auto 50px auto;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+#report-box h2 {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 25px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+th, td {
+    border: 1px solid #dee2e6;
+    padding: 10px 12px;
+    text-align: left;
+}
+th {
+    background-color: #007bff;
+    color: #fff;
+}
+td {
+    background-color: #f8f9fa;
+}
+#scan-preview {
+    display: block;
+    max-width: 300px;
+    margin: 15px auto;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+#download-btn {
+    display: block;
+    width: 220px;
+    margin: 20px auto 0 auto;
+    padding: 12px 20px;
+    text-align: center;
+    background-color: #28a745;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+#download-btn:hover {
+    background-color: #218838;
+}
+.status {
+    max-width: 700px;
+    margin: 10px auto;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+.status.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+
+/* --- Stage highlight styles --- */
+.stage-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-align: center;
+}
+.stage-1 { background-color: #d4edda; color: #155724; }     /* Stage I - green */
+.stage-2 { background-color: #fff3cd; color: #856404; }     /* Stage II - yellow */
+.stage-3 { background-color: #ffeeba; color: #856404; }     /* Stage III - orange */
+.stage-4 { background-color: #f8d7da; color: #721c24; }     /* Stage IV - red */
+.stage-na { background-color: #e2e3e5; color: #383d41; }    /* Not Applicable */
+</style>
+</head>
+<body>
+
+<div id="message-box">
+    {% if result == "Benign" %}
+        ✅ Good news! Your result is <b>Benign</b>. Stay healthy!
+    {% else %}
+        ⚠️ Attention! Your result is <b>Malignant</b>. Consult your doctor immediately.
+    {% endif %}
+</div>
+
+<div id="report-box">
+    <h2>Breast Cancer Prediction Report</h2>
+
+    {% if session['scan_image'] %}
+        <img id="scan-preview" src="{{ url_for('static', filename=session['scan_image'].split('/')[-1]) }}" alt="Scan Preview">
+    {% endif %}
+
+    <table>
+        <tr><th>Patient Name</th><td>{{ report["Name"] }}</td></tr>
+        <tr><th>Patient Age</th><td>{{ report["Age"] }}</td></tr>
+        <tr><th>Patient Address</th><td>{{ report["Address"] }}</td></tr>
+
+        <tr>
+            <th>Prediction Result</th>
+            <td style="color: {% if result=='Benign' %}#28a745{% else %}#dc3545{% endif %}; font-weight:bold;">
+                {{ result }}
+            </td>
+        </tr>
+
+        <tr><th>Prediction Confidence</th><td>{{ report["Confidence"] }}</td></tr>
+
+        <tr>
+            <th>Cancer Stage</th>
+            <td>
+                {% if report["Stage"] == "Stage I (Early)" %}
+                    <span class="stage-badge stage-1">{{ report["Stage"] }}</span>
+                {% elif report["Stage"] == "Stage II (Localized)" %}
+                    <span class="stage-badge stage-2">{{ report["Stage"] }}</span>
+                {% elif report["Stage"] == "Stage III (Regional Spread)" %}
+                    <span class="stage-badge stage-3">{{ report["Stage"] }}</span>
+                {% elif report["Stage"] == "Stage IV (Advanced)" %}
+                    <span class="stage-badge stage-4">{{ report["Stage"] }}</span>
+                {% else %}
+                    <span class="stage-badge stage-na">{{ report["Stage"] }}</span>
+                {% endif %}
+            </td>
+        </tr>
+
+        <tr><th>Consultation Advice</th><td>{{ report["Consultation"] }}</td></tr>
+        <tr><th>Precautions</th><td>{{ report["Precautions"] }}</td></tr>
+        <tr><th>Report Generated On</th><td>{{ report["GeneratedOn"] }}</td></tr>
+    </table>
+
+    <a id="download-btn" href="{{ url_for('download') }}">⬇ Download Result PDF</a>
+</div>
+
+<!-- Email Status -->
+{% if email_status %}
+<p class="status success">📧 Report emailed successfully to: {{ report['Email'] }}</p>
+{% elif report['Email'] %}
+<p class="status warning">⚠️ Failed to send email to: {{ report['Email'] }}</p>
+{% endif %}
+
+</body>
+</html>

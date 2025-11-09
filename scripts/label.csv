@@ -1,0 +1,76 @@
+import os
+import shutil
+import random
+import csv
+from pathlib import Path
+
+# ===============================
+# Config
+# ===============================
+DATASET_DIR = r"C:\Users\sonuh\breast_cancer_detection\dataset\BreaKHis_v1\BreaKHis_v1\histology_slides\breast"
+OUTPUT_DIR = r"C:\Users\sonuh\breast_cancer_detection\dataset\split_dataset"
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".tif", ".tiff"}
+SPLIT_RATIO = {"train": 0.7, "val": 0.15, "test": 0.15}
+
+# ===============================
+# Create output folders
+# ===============================
+for split in SPLIT_RATIO:
+    for label in ["benign", "malignant"]:
+        Path(OUTPUT_DIR, split, label).mkdir(parents=True, exist_ok=True)
+
+# ===============================
+# Collect all image paths with labels
+# ===============================
+files_with_labels = []
+
+for root, _, filenames in os.walk(DATASET_DIR):
+    for fname in filenames:
+        if Path(fname).suffix.lower() in IMAGE_EXTENSIONS:
+            full_path = Path(root) / fname
+            # Determine top-level label
+            parts = full_path.parts
+            if "benign" in parts:
+                label = "benign"
+            elif "malignant" in parts:
+                label = "malignant"
+            else:
+                continue
+            files_with_labels.append((full_path, label))
+
+print(f"Found {len(files_with_labels)} images.")
+
+# ===============================
+# Shuffle and split
+# ===============================
+random.shuffle(files_with_labels)
+
+split_counts = {split: int(len(files_with_labels) * ratio) for split, ratio in SPLIT_RATIO.items()}
+
+split_data = {"train": [], "val": [], "test": []}
+index = 0
+
+for split in ["train", "val", "test"]:
+    count = split_counts[split]
+    split_data[split] = files_with_labels[index:index+count]
+    index += count
+
+# Adjust for any rounding issues
+remaining = files_with_labels[index:]
+if remaining:
+    split_data["train"].extend(remaining)
+
+# ===============================
+# Copy files and generate labels.csv
+# ===============================
+for split, items in split_data.items():
+    csv_path = Path(OUTPUT_DIR, f"{split}_labels.csv")
+    with open(csv_path, mode="w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["filename", "label"])
+        for src_path, label in items:
+            dest_folder = Path(OUTPUT_DIR, split, label)
+            dest_path = dest_folder / src_path.name
+            shutil.copy2(src_path, dest_path)
+            writer.writerow([dest_path.name, label])
+    print(f"✅ {split} split done with {len(items)} images. Labels CSV saved to {csv_path}")

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Breast Cancer Detection (CNN)</title>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<style>
+body { 
+    margin:0; 
+    overflow:hidden; 
+    font-family:'Poppins',sans-serif; 
+    background:#0a0f1f; 
+}
+#form-container {
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    background: rgba(255,255,255,0.1);
+    padding:30px;
+    border-radius:20px;
+    backdrop-filter: blur(20px);
+    text-align:center;
+    color:white;
+    z-index:2;
+    box-shadow:0 10px 40px rgba(0,0,0,0.6);
+}
+input, button { 
+    padding:12px; 
+    border:none; 
+    border-radius:10px; 
+    margin:10px 0; 
+    width: 100%;
+}
+button { 
+    background:#ff758c; 
+    color:white; 
+    font-weight:bold; 
+    cursor:pointer; 
+    transition:.3s; 
+}
+button:hover { background:#ff4b5c; }
+canvas { display:block; position:fixed; top:0; left:0; z-index:1; }
+.error { color:#ff4b5c; font-size:0.9rem; margin-top:-5px; margin-bottom:10px; display:none; }
+</style>
+</head>
+<body>
+
+<div id="form-container">
+    <h1>🧬 Breast Cancer Detection (CNN)</h1>
+    <form id="patientForm" action="/predict" method="post" enctype="multipart/form-data">
+        <label>Upload Mammogram / Histopathology Image:</label><br>
+        <input type="file" name="file" accept="image/*" required><br>
+
+        <!-- Patient info -->
+        <input type="text" name="name" placeholder="Patient Name" required><br>
+        <input type="number" name="age" placeholder="Patient Age" required><br>
+        <input type="text" name="address" placeholder="Patient Address" required><br>
+
+        <!-- Contact info -->
+        <input type="email" name="email" placeholder="Patient Email" required><br>
+        <span id="emailError" class="error">Please enter a valid email.</span>
+
+        <input type="text" name="whatsapp" placeholder="WhatsApp Number (+CountryCode, e.g. +1415XXXXXXX)"><br>
+        <span id="whatsappError" class="error">Enter WhatsApp number in format: +<countrycode><number></span>
+
+        <button type="submit">🔍 Analyze with CNN</button>
+    </form>
+</div>
+
+<canvas id="dnaCanvas"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script>
+// DNA Canvas animation
+const canvas = document.getElementById('dnaCanvas');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0,2,10);
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+
+for(let i=0;i<100;i++){
+    const geometry = new THREE.SphereGeometry(Math.random()*0.05,8,8);
+    const material = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.2});
+    const p = new THREE.Mesh(geometry, material);
+    p.position.set((Math.random()-0.5)*20, Math.random()*10, (Math.random()-0.5)*20);
+    scene.add(p);
+}
+
+const helix = new THREE.Group();
+scene.add(helix);
+for(let i=0;i<400;i++){
+    const angle = i*0.3;
+    const y = i*0.3*0.05;
+    const x1 = Math.sin(angle)*1.5;
+    const z1 = Math.cos(angle)*1.5;
+    const x2 = Math.sin(angle+Math.PI)*1.5;
+    const z2 = Math.cos(angle+Math.PI)*1.5;
+    const mat1 = new THREE.MeshStandardMaterial({color:0xff4b5c, emissive:0xff4b5c});
+    const mat2 = new THREE.MeshStandardMaterial({color:0x00c3ff, emissive:0x00c3ff});
+    const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.15,32,32), mat1);
+    const s2 = new THREE.Mesh(new THREE.SphereGeometry(0.15,32,32), mat2);
+    s1.position.set(x1,y,z1); 
+    s2.position.set(x2,y,z2);
+    helix.add(s1); 
+    helix.add(s2);
+}
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+const pointLight = new THREE.PointLight(0xffffff, 1);
+pointLight.position.set(5,10,5);
+scene.add(pointLight);
+
+function animate(){
+    requestAnimationFrame(animate);
+    helix.rotation.y += 0.002;
+    renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// -----------------------
+// Form validation
+// -----------------------
+document.getElementById('patientForm').addEventListener('submit', function(e){
+    let valid = true;
+    const email = this.email.value.trim();
+    const whatsapp = this.whatsapp.value.trim();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const whatsappRegex = /^\+\d{7,15}$/;
+
+    if(email && !emailRegex.test(email)){
+        document.getElementById('emailError').style.display = 'block';
+        valid = false;
+    } else { document.getElementById('emailError').style.display = 'none'; }
+
+    if(whatsapp && !whatsappRegex.test(whatsapp)){
+        document.getElementById('whatsappError').style.display = 'block';
+        valid = false;
+    } else { document.getElementById('whatsappError').style.display = 'none'; }
+
+    if(!valid) e.preventDefault();
+});
+</script>
+
+</body>
+</html>

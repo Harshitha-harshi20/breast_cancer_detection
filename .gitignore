@@ -1,0 +1,45 @@
+# ---------------------------
+# System / OS files
+# ---------------------------
+.DS_Store
+Thumbs.db
+*.log
+
+# ---------------------------
+# IDE / Editor files
+# ---------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ---------------------------
+# Python cache and compiled files
+# ---------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ---------------------------
+# Dataset and large files
+# ---------------------------
+# Ignore full dataset folder (optional, if you don't want to push datasets)
+dataset/
+
+# Ignore uploads folder (images, PDFs)
+uploads/
+reports/
+
+# ---------------------------
+# Temporary files
+# ---------------------------
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# ---------------------------
+# Environment files (if any)
+# ---------------------------
+.env
