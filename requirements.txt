@@ -1,0 +1,8 @@
+Flask
+tensorflow
+Pillow
+reportlab
+python-dotenv
+werkzeug
+numpy
+gunicorn
